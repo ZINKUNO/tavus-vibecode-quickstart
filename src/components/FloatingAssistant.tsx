@@ -7,18 +7,24 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
+import { apiTokenAtom } from '../store/tokens';
 
 export const FloatingAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
+  const [apiToken] = useAtom(apiTokenAtom);
   const [inputText, setInputText] = useState('');
 
   const startTavusConversation = async () => {
+    if (!apiToken) {
+      console.error('API token is required to create a Tavus conversation');
+      return;
+    }
+
     setIsCreating(true);
     try {
-      // Replace with your actual API key and persona/replica IDs
-      const tavus = new TavusAPI('your-api-key-here');
+      const tavus = new TavusAPI(apiToken);
       const newConversation = await tavus.createConversation({
         persona_id: 'your-persona-id',
         replica_id: 'your-replica-id',
@@ -35,9 +41,9 @@ export const FloatingAssistant: React.FC = () => {
   };
 
   const endTavusConversation = async () => {
-    if (conversation) {
+    if (conversation && apiToken) {
       try {
-        const tavus = new TavusAPI('your-api-key-here');
+        const tavus = new TavusAPI(apiToken);
         await tavus.endConversation(conversation.conversation_id);
         setConversation(null);
       } catch (error) {
@@ -148,11 +154,11 @@ export const FloatingAssistant: React.FC = () => {
                     
                     <Button
                       onClick={startTavusConversation}
-                      disabled={isCreating}
+                      disabled={isCreating || !apiToken}
                       className="w-full"
                     >
                       <Video className="w-4 h-4 mr-2" />
-                      {isCreating ? 'Starting...' : 'Start Video Chat'}
+                      {isCreating ? 'Starting...' : !apiToken ? 'API Token Required' : 'Start Video Chat'}
                     </Button>
                   </div>
                 )}
