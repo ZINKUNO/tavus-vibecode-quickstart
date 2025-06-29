@@ -6,7 +6,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
-import { WhisperTranscriptionPanel } from './WhisperTranscriptionPanel';
+import { ElevenLabsTranscriptionPanel } from './ElevenLabsTranscriptionPanel';
 
 const TAVUS_API_KEY = '2f263fcb5fa44c7ca8ed76d789cdb756';
 const TAVUS_REPLICA_ID = 'r9fa0878977a';
@@ -113,7 +113,7 @@ export const FloatingAssistant: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white text-sm">AI Assistant</h3>
-                      <p className="text-xs text-white/60">Powered by Tavus & Whisper</p>
+                      <p className="text-xs text-white/60">Powered by Tavus & ElevenLabs</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -150,10 +150,10 @@ export const FloatingAssistant: React.FC = () => {
                       />
                     </div>
                     
-                    {/* Whisper Transcription Panel - Only show when expanded and conversation is active */}
+                    {/* ElevenLabs Transcription Panel - Only show when expanded and conversation is active */}
                     {isExpanded && showTranscription && (
                       <div className="w-96 h-full">
-                        <WhisperTranscriptionPanel 
+                        <ElevenLabsTranscriptionPanel 
                           autoStart={true}
                           showSettings={true}
                         />
@@ -199,12 +199,12 @@ export const FloatingAssistant: React.FC = () => {
                       className="w-full"
                     >
                       <Video className="w-4 h-4 mr-2" />
-                      {isCreating ? 'Starting...' : 'Start Video Chat with Transcription'}
+                      {isCreating ? 'Starting...' : 'Start Video Chat with ElevenLabs Transcription'}
                     </Button>
 
                     <div className="text-center text-xs text-white/60 space-y-1">
-                      <p>💡 Tip: Expand the chat window to see live Whisper transcription</p>
-                      <p>🎤 Real-time speech-to-text powered by OpenAI Whisper</p>
+                      <p>💡 Tip: Expand the chat window to see live ElevenLabs transcription</p>
+                      <p>🎤 Real-time speech-to-text powered by ElevenLabs AI</p>
                     </div>
                   </div>
                 )}

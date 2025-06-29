@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Upload, Mic, Loader2, Download, Play } from 'lucide-react';
+import { Upload, Mic, Loader2, Download, Play, Zap } from 'lucide-react';
+import { ElevenLabsTranscriptionPanel } from '../ElevenLabsTranscriptionPanel';
 
 interface GeneratedVideo {
   video_id: string;
@@ -19,6 +20,7 @@ export const AudioVideoGenerator: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
+  const [showTranscription, setShowTranscription] = useState(false);
 
   const generateVideoFromAudio = async () => {
     if (!audioFile) return;
@@ -128,111 +130,145 @@ export const AudioVideoGenerator: React.FC = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <Mic className="w-6 h-6 text-neon-purple" />
-          Generate Video from Audio
-        </CardTitle>
-      </CardHeader>
+    <div className="space-y-6">
+      {/* Audio to Video Generator */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            <Mic className="w-6 h-6 text-neon-purple" />
+            Generate Video from Audio
+          </CardTitle>
+        </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Audio Upload Section */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="file"
-              accept="audio/*"
-              onChange={handleAudioUpload}
-              className="hidden"
-              id="audio-upload"
-            />
-            <label
-              htmlFor="audio-upload"
-              className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm cursor-pointer hover:bg-white/20 transition-colors flex items-center gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {audioFile ? audioFile.name : 'Choose audio file'}
-            </label>
-          </div>
-          
-          <Button
-            onClick={generateVideoFromAudio}
-            disabled={!audioFile || isGeneratingVideo}
-            className="w-full"
-          >
-            {isGeneratingVideo ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating Video...
-              </>
-            ) : (
-              <>
-                <Mic className="w-4 h-4 mr-2" />
-                Generate Video
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Generated Videos List */}
-        {generatedVideos.length > 0 && (
+        <CardContent className="space-y-6">
+          {/* Audio Upload Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Generated Videos from Audio</h3>
-            <div className="space-y-3">
-              {generatedVideos.map((video) => (
-                <motion.div
-                  key={video.video_id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-white/5 rounded-xl border border-white/10"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-white">
-                      Audio: {video.audio_file_name}
-                    </span>
-                    <span className={`text-sm font-medium ${getStatusColor(video.status)}`}>
-                      {video.status.charAt(0).toUpperCase() + video.status.slice(1)}
-                    </span>
-                  </div>
-                  
-                  <p className="text-xs text-white/60 mb-3">
-                    Video ID: {video.video_id.slice(0, 8)}...
-                  </p>
-
-                  {video.status === 'completed' && (
-                    <div className="flex gap-2">
-                      {video.hosted_url && (
-                        <Button variant="secondary" size="sm" asChild>
-                          <a href={video.hosted_url} target="_blank" rel="noopener noreferrer">
-                            <Play className="w-4 h-4 mr-2" />
-                            Watch
-                          </a>
-                        </Button>
-                      )}
-                      {video.download_url && (
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={video.download_url} download>
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-                  )}
-
-                  {video.status === 'processing' && (
-                    <div className="flex items-center gap-2 text-yellow-400">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span className="text-sm">Processing video...</span>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioUpload}
+                className="hidden"
+                id="audio-upload"
+              />
+              <label
+                htmlFor="audio-upload"
+                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm cursor-pointer hover:bg-white/20 transition-colors flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                {audioFile ? audioFile.name : 'Choose audio file'}
+              </label>
             </div>
+            
+            <Button
+              onClick={generateVideoFromAudio}
+              disabled={!audioFile || isGeneratingVideo}
+              className="w-full"
+            >
+              {isGeneratingVideo ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Generating Video...
+                </>
+              ) : (
+                <>
+                  <Mic className="w-4 h-4 mr-2" />
+                  Generate Video
+                </>
+              )}
+            </Button>
           </div>
+
+          {/* Generated Videos List */}
+          {generatedVideos.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Generated Videos from Audio</h3>
+              <div className="space-y-3">
+                {generatedVideos.map((video) => (
+                  <motion.div
+                    key={video.video_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-white/5 rounded-xl border border-white/10"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-white">
+                        Audio: {video.audio_file_name}
+                      </span>
+                      <span className={`text-sm font-medium ${getStatusColor(video.status)}`}>
+                        {video.status.charAt(0).toUpperCase() + video.status.slice(1)}
+                      </span>
+                    </div>
+                    
+                    <p className="text-xs text-white/60 mb-3">
+                      Video ID: {video.video_id.slice(0, 8)}...
+                    </p>
+
+                    {video.status === 'completed' && (
+                      <div className="flex gap-2">
+                        {video.hosted_url && (
+                          <Button variant="secondary" size="sm" asChild>
+                            <a href={video.hosted_url} target="_blank" rel="noopener noreferrer">
+                              <Play className="w-4 h-4 mr-2" />
+                              Watch
+                            </a>
+                          </Button>
+                        )}
+                        {video.download_url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={video.download_url} download>
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    )}
+
+                    {video.status === 'processing' && (
+                      <div className="flex items-center gap-2 text-yellow-400">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Processing video...</span>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ElevenLabs Transcription Panel */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-3">
+              <Zap className="w-6 h-6 text-neon-blue" />
+              Live Audio Transcription
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTranscription(!showTranscription)}
+              className="text-white/60 hover:text-white"
+            >
+              {showTranscription ? 'Hide' : 'Show'}
+            </Button>
+          </div>
+        </CardHeader>
+
+        {showTranscription && (
+          <CardContent className="p-0">
+            <div className="h-96">
+              <ElevenLabsTranscriptionPanel 
+                showSettings={true}
+                className="border-0"
+              />
+            </div>
+          </CardContent>
         )}
-      </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
