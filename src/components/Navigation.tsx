@@ -57,7 +57,7 @@ export const Navigation: React.FC = () => {
             </button>
           ))}
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 relative">
             {isAuthenticated && user && (
               <div className="flex items-center gap-2 text-white/70">
                 <User className="w-4 h-4" />
@@ -78,6 +78,18 @@ export const Navigation: React.FC = () => {
                 'Sign In'
               )}
             </Button>
+            
+            {/* White Circle Icon positioned below sign-in button */}
+            <div className="absolute -bottom-12 right-0">
+              <motion.img
+                src="/images/white_circle_360x360.png"
+                alt="Bolt.new"
+                className="w-8 h-8 opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.open('https://bolt.new', '_blank')}
+              />
+            </div>
           </div>
         </div>
       </div>
