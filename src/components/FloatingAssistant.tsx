@@ -7,27 +7,22 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
-import { apiTokenAtom } from '../store/tokens';
+
+const TAVUS_API_KEY = '2f263fcb5fa44c7ca8ed76d789cdb756';
+const TAVUS_REPLICA_ID = 'r9fa0878977a';
 
 export const FloatingAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
-  const [apiToken] = useAtom(apiTokenAtom);
   const [inputText, setInputText] = useState('');
 
   const startTavusConversation = async () => {
-    if (!apiToken) {
-      console.error('API token is required to create a Tavus conversation');
-      return;
-    }
-
     setIsCreating(true);
     try {
-      const tavus = new TavusAPI(apiToken);
+      const tavus = new TavusAPI(TAVUS_API_KEY);
       const newConversation = await tavus.createConversation({
-        persona_id: 'your-persona-id',
-        replica_id: 'your-replica-id',
+        replica_id: TAVUS_REPLICA_ID,
         custom_greeting: 'Hi! I\'m your AI creator assistant. How can I help you create amazing content today?',
         conversational_context: 'You are an AI assistant specialized in helping content creators with video generation, social media strategy, and brand development.',
       });
@@ -41,9 +36,9 @@ export const FloatingAssistant: React.FC = () => {
   };
 
   const endTavusConversation = async () => {
-    if (conversation && apiToken) {
+    if (conversation) {
       try {
-        const tavus = new TavusAPI(apiToken);
+        const tavus = new TavusAPI(TAVUS_API_KEY);
         await tavus.endConversation(conversation.conversation_id);
         setConversation(null);
       } catch (error) {
@@ -154,11 +149,11 @@ export const FloatingAssistant: React.FC = () => {
                     
                     <Button
                       onClick={startTavusConversation}
-                      disabled={isCreating || !apiToken}
+                      disabled={isCreating}
                       className="w-full"
                     >
                       <Video className="w-4 h-4 mr-2" />
-                      {isCreating ? 'Starting...' : !apiToken ? 'API Token Required' : 'Start Video Chat'}
+                      {isCreating ? 'Starting...' : 'Start Video Chat'}
                     </Button>
                   </div>
                 )}

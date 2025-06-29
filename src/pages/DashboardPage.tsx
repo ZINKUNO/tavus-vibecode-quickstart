@@ -4,6 +4,8 @@ import { ChatInterface } from '../components/assistant/ChatInterface';
 import { ControlPanel } from '../components/dashboard/ControlPanel';
 import { ContentCalendar } from '../components/dashboard/ContentCalendar';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsDashboard';
+import { VideoGenerator } from '../components/dashboard/VideoGenerator';
+import { SocialMediaConnector } from '../components/dashboard/SocialMediaConnector';
 
 export const DashboardPage: React.FC = () => {
   return (
@@ -33,23 +35,33 @@ export const DashboardPage: React.FC = () => {
             <ChatInterface />
           </motion.div>
 
-          {/* Right Panel - Control Panel */}
+          {/* Right Panel - Video Generator */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            className="h-[600px]"
+            className="h-[600px] overflow-y-auto"
           >
-            <ControlPanel />
+            <VideoGenerator />
           </motion.div>
         </div>
+
+        {/* Social Media Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mb-8"
+        >
+          <SocialMediaConnector />
+        </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Content Calendar */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.8 }}
             className="lg:col-span-2"
           >
             <ContentCalendar />
@@ -59,7 +71,7 @@ export const DashboardPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 1.0 }}
           >
             <AnalyticsDashboard />
           </motion.div>
