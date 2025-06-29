@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
-import { MessageCircle, X, Sparkles, Video, Maximize2, Minimize2, Mic, Upload } from 'lucide-react';
+import { MessageCircle, X, Sparkles, Video, Maximize2, Minimize2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
 
@@ -16,8 +15,6 @@ export const FloatingAssistant: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
-  const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
   const startTavusConversation = async () => {
     setIsCreating(true);
@@ -46,46 +43,6 @@ export const FloatingAssistant: React.FC = () => {
       } catch (error) {
         console.error('Failed to end Tavus conversation:', error);
       }
-    }
-  };
-
-  const generateVideoFromAudio = async () => {
-    if (!audioFile) return;
-
-    setIsGeneratingVideo(true);
-    try {
-      // First, upload the audio file (you'd need to implement file upload)
-      const formData = new FormData();
-      formData.append('audio', audioFile);
-      
-      // This is a placeholder - you'd need to implement audio upload to get a URL
-      const audioUrl = 'https://example.com/audio.mp3'; // Replace with actual upload logic
-
-      const response = await fetch('https://tavusapi.com/v2/videos', {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": TAVUS_API_KEY
-        },
-        body: JSON.stringify({
-          "replica_id": "rb17cf590e15",
-          "audio_url": audioUrl
-        }),
-      });
-
-      const data = await response.json();
-      console.log('Video generation started:', data);
-    } catch (error) {
-      console.error('Failed to generate video from audio:', error);
-    } finally {
-      setIsGeneratingVideo(false);
-    }
-  };
-
-  const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
-      setAudioFile(file);
     }
   };
 
@@ -228,40 +185,6 @@ export const FloatingAssistant: React.FC = () => {
                       <Video className="w-4 h-4 mr-2" />
                       {isCreating ? 'Starting...' : 'Start Video Chat'}
                     </Button>
-
-                    {/* Audio Video Generation */}
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                      <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
-                        <Mic className="w-4 h-4" />
-                        Generate Video from Audio
-                      </h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="file"
-                            accept="audio/*"
-                            onChange={handleAudioUpload}
-                            className="hidden"
-                            id="audio-upload"
-                          />
-                          <label
-                            htmlFor="audio-upload"
-                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm cursor-pointer hover:bg-white/20 transition-colors flex items-center gap-2"
-                          >
-                            <Upload className="w-4 h-4" />
-                            {audioFile ? audioFile.name : 'Choose audio file'}
-                          </label>
-                        </div>
-                        <Button
-                          onClick={generateVideoFromAudio}
-                          disabled={!audioFile || isGeneratingVideo}
-                          variant="secondary"
-                          className="w-full"
-                        >
-                          {isGeneratingVideo ? 'Generating...' : 'Generate Video'}
-                        </Button>
-                      </div>
-                    </div>
                   </div>
                 )}
               </div>

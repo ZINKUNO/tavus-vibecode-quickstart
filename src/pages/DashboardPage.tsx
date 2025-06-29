@@ -4,6 +4,7 @@ import { useAtom } from 'jotai';
 import { ContentCalendar } from '../components/dashboard/ContentCalendar';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsDashboard';
 import { VideoGenerator } from '../components/dashboard/VideoGenerator';
+import { AudioVideoGenerator } from '../components/dashboard/AudioVideoGenerator';
 import { SocialMediaConnector } from '../components/dashboard/SocialMediaConnector';
 import { userAtom, profileAtom } from '../store/auth';
 import { useAuth } from '../hooks/useAuth';
@@ -74,40 +75,52 @@ export const DashboardPage: React.FC = () => {
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="h-[600px] overflow-y-auto"
+                className="space-y-6"
               >
                 <VideoGenerator />
               </motion.div>
 
-              {/* Right Panel - Social Media */}
+              {/* Right Panel - Audio Video Generator */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
+                className="space-y-6"
+              >
+                <AudioVideoGenerator />
+              </motion.div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+              {/* Social Media Connector */}
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
                 className="h-[600px] overflow-y-auto"
               >
                 <SocialMediaConnector />
               </motion.div>
+
+              {/* Analytics */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 }}
+                className="h-[600px] overflow-y-auto"
+              >
+                <AnalyticsDashboard />
+              </motion.div>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid lg:grid-cols-1 gap-8">
               {/* Content Calendar */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="lg:col-span-2"
+                transition={{ delay: 1.0 }}
               >
                 <ContentCalendar />
-              </motion.div>
-
-              {/* Analytics */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-              >
-                <AnalyticsDashboard />
               </motion.div>
             </div>
           </>
