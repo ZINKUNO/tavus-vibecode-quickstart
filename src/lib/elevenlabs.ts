@@ -113,14 +113,21 @@ export class ElevenLabsTranscriber {
       // Create FormData for file upload
       const formData = new FormData();
       formData.append('audio', audioFile);
-      formData.append('model', this.config.model || 'whisper-1');
       
+      // Use correct parameter name for model
+      formData.append('model_id', this.config.model || 'whisper-1');
+      
+      // Only add optional parameters if they are set
       if (this.config.language) {
         formData.append('language', this.config.language);
       }
       
-      if (this.config.optimize_streaming_latency) {
+      if (this.config.optimize_streaming_latency !== undefined) {
         formData.append('optimize_streaming_latency', this.config.optimize_streaming_latency.toString());
+      }
+
+      if (this.config.output_format) {
+        formData.append('output_format', this.config.output_format);
       }
 
       const response = await fetch(`${ELEVENLABS_API_BASE}/speech-to-text`, {
@@ -136,6 +143,7 @@ export class ElevenLabsTranscriber {
         
         try {
           const errorData = await response.json();
+          console.error('ElevenLabs API error response:', errorData);
           
           // Extract detailed error message from various possible fields
           if (errorData.detail) {
@@ -147,23 +155,34 @@ export class ElevenLabsTranscriber {
                 if (typeof err === 'string') return err;
                 if (err.msg) return err.msg;
                 if (err.message) return err.message;
+                if (err.loc && err.msg) return `${err.loc.join('.')}: ${err.msg}`;
                 return JSON.stringify(err);
               }).join(', ');
-              errorMessage = `ElevenLabs API error (${response.status}): ${details}`;
-            } else {
-              errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData.detail)}`;
+              errorMessage = `ElevenLabs API validation error (${response.status}): ${details}`;
+            } else if (typeof errorData.detail === 'object') {
+              // Handle object-type detail
+              if (errorData.detail.message) {
+                errorMessage = `ElevenLabs API error (${response.status}): ${errorData.detail.message}`;
+              } else {
+                errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData.detail)}`;
+              }
             }
           } else if (errorData.message) {
             errorMessage = `ElevenLabs API error (${response.status}): ${errorData.message}`;
           } else if (errorData.error) {
-            errorMessage = `ElevenLabs API error (${response.status}): ${errorData.error}`;
+            if (typeof errorData.error === 'string') {
+              errorMessage = `ElevenLabs API error (${response.status}): ${errorData.error}`;
+            } else {
+              errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData.error)}`;
+            }
           } else {
             // Fallback to full error object
             errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData)}`;
           }
         } catch (parseError) {
           // If we can't parse the error response, use the original message
-          console.warn('Failed to parse error response:', parseError);
+          console.warn('Failed to parse ElevenLabs error response:', parseError);
+          errorMessage = `ElevenLabs API error (${response.status}): Unable to parse error details`;
         }
         
         throw new Error(errorMessage);
@@ -321,9 +340,9 @@ export class ElevenLabsTranscriber {
     
     if (errorMessage.includes('422')) {
       // Extract the detailed error message for 422 errors
-      const match = errorMessage.match(/ElevenLabs API error \(422\): (.+)/);
+      const match = errorMessage.match(/ElevenLabs API (?:validation )?error \(422\): (.+)/);
       if (match && match[1]) {
-        this.onError(`ElevenLabs API validation error: ${match[1]}`);
+        this.onError(`ElevenLabs validation error: ${match[1]}`);
       } else {
         this.onError('ElevenLabs API validation error. Please check your audio format and parameters.');
       }
