@@ -20,17 +20,38 @@ export const LoginPage: React.FC = () => {
   const { signIn, signUp, isLoading } = useAuth();
   const [, setCurrentPage] = useAtom(currentPageAtom);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
+  const validateForm = () => {
     if (!email || !password) {
       setError('Please fill in all fields');
-      return;
+      return false;
     }
 
     if (!isLogin && !fullName) {
       setError('Please enter your full name');
+      return false;
+    }
+
+    // Password length validation
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!validateForm()) {
       return;
     }
 
@@ -49,7 +70,19 @@ export const LoginPage: React.FC = () => {
       } else {
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          setError(error.message);
+          // Handle specific error cases with better messaging
+          if (error.message.includes('User already registered')) {
+            setError('An account with this email already exists. Please sign in instead.');
+            // Automatically switch to login mode
+            setTimeout(() => {
+              setIsLogin(true);
+              setError('');
+            }, 3000);
+          } else if (error.message.includes('weak_password')) {
+            setError('Password must be at least 6 characters long');
+          } else {
+            setError(error.message);
+          }
         } else {
           setError('');
           alert('Check your email for verification link!');
@@ -147,8 +180,9 @@ export const LoginPage: React.FC = () => {
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      placeholder={isLogin ? "Enter your password" : "Enter password (min. 6 characters)"}
                       className="bg-white/10 border-white/20 text-white pr-10"
+                      minLength={6}
                       required
                     />
                     <button
@@ -159,6 +193,11 @@ export const LoginPage: React.FC = () => {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  {!isLogin && (
+                    <p className="text-xs text-white/60">
+                      Password must be at least 6 characters long
+                    </p>
+                  )}
                 </div>
 
                 {isLogin && (
@@ -187,7 +226,10 @@ export const LoginPage: React.FC = () => {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setIsLogin(!isLogin)}
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setError('');
+                    }}
                     className="text-neon-blue hover:underline text-sm"
                   >
                     {isLogin 
