@@ -153,7 +153,7 @@ export const EnhancedVideoGenerator: React.FC = () => {
         script: generationType === 'script' ? script.trim() : undefined,
         audio_file_name: generationType === 'audio' ? audioFile?.name : undefined,
         replica_id: selectedReplica,
-        persona_id: selectedPersona || undefined,
+        persona_id: selectedPersona === 'none' ? undefined : selectedPersona || undefined,
         progress: 0,
         created_at: new Date(),
         estimated_completion: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes estimate
@@ -336,7 +336,7 @@ export const EnhancedVideoGenerator: React.FC = () => {
                 <SelectValue placeholder="Choose a persona for your AI" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Persona</SelectItem>
+                <SelectItem value="none">No Persona</SelectItem>
                 {personas.map((persona) => (
                   <SelectItem key={persona.persona_id} value={persona.persona_id}>
                     <div className="flex items-center gap-2">
