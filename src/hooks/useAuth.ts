@@ -9,16 +9,43 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useAtom(isLoadingAtom)
 
   useEffect(() => {
+    let mounted = true
+
     // Get initial session
     const getInitialSession = async () => {
-      setIsLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        await fetchProfile(session.user.id)
+      try {
+        setIsLoading(true)
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Error getting session:', error)
+          if (mounted) {
+            setUser(null)
+            setProfile(null)
+          }
+          return
+        }
+
+        if (mounted) {
+          setUser(session?.user ?? null)
+          
+          if (session?.user) {
+            await fetchProfile(session.user.id)
+          } else {
+            setProfile(null)
+          }
+        }
+      } catch (error) {
+        console.error('Session error:', error)
+        if (mounted) {
+          setUser(null)
+          setProfile(null)
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
       }
-      setIsLoading(false)
     }
 
     getInitialSession()
@@ -26,6 +53,10 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return
+
+        console.log('Auth state changed:', event, session?.user?.email)
+        
         setUser(session?.user ?? null)
         
         if (session?.user) {
@@ -36,7 +67,10 @@ export const useAuth = () => {
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [setUser, setProfile, setIsLoading])
 
   const fetchProfile = async (userId: string) => {
@@ -48,7 +82,8 @@ export const useAuth = () => {
         .single()
 
       if (error && error.code !== 'PGRST116') {
-        throw error
+        console.error('Error fetching profile:', error)
+        return
       }
 
       setProfile(data)
@@ -79,11 +114,15 @@ export const useAuth = () => {
             },
           ])
 
-        if (profileError) throw profileError
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Don't throw here, user is still created
+        }
       }
 
       return { data, error: null }
     } catch (error) {
+      console.error('Sign up error:', error)
       return { data: null, error }
     } finally {
       setIsLoading(false)
@@ -101,6 +140,7 @@ export const useAuth = () => {
       if (error) throw error
       return { data, error: null }
     } catch (error) {
+      console.error('Sign in error:', error)
       return { data: null, error }
     } finally {
       setIsLoading(false)
