@@ -152,11 +152,21 @@ export const useAuth = () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
+      
+      // Clear local state
+      setUser(null)
+      setProfile(null)
     } catch (error) {
       console.error('Error signing out:', error)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const connectWeb3Wallet = async () => {
+    // Placeholder for Web3 wallet connection
+    console.log('Web3 wallet connection not implemented yet')
+    return { success: false, message: 'Web3 wallet connection coming soon' }
   }
 
   return {
@@ -166,5 +176,6 @@ export const useAuth = () => {
     signUp,
     signIn,
     signOut,
+    connectWeb3Wallet,
   }
 }

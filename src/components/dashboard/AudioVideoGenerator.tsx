@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Upload, Mic, Loader2, Download, Play, Zap } from 'lucide-react';
-import { ElevenLabsTranscriptionPanel } from '../ElevenLabsTranscriptionPanel';
 
 interface GeneratedVideo {
   video_id: string;
@@ -20,7 +19,6 @@ export const AudioVideoGenerator: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [generatedVideos, setGeneratedVideos] = useState<GeneratedVideo[]>([]);
-  const [showTranscription, setShowTranscription] = useState(false);
 
   const generateVideoFromAudio = async () => {
     if (!audioFile) return;
@@ -237,37 +235,6 @@ export const AudioVideoGenerator: React.FC = () => {
             </div>
           )}
         </CardContent>
-      </Card>
-
-      {/* ElevenLabs Transcription Panel */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-3">
-              <Zap className="w-6 h-6 text-neon-blue" />
-              Live Audio Transcription
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowTranscription(!showTranscription)}
-              className="text-white/60 hover:text-white"
-            >
-              {showTranscription ? 'Hide' : 'Show'}
-            </Button>
-          </div>
-        </CardHeader>
-
-        {showTranscription && (
-          <CardContent className="p-0">
-            <div className="h-96">
-              <ElevenLabsTranscriptionPanel 
-                showSettings={true}
-                className="border-0"
-              />
-            </div>
-          </CardContent>
-        )}
       </Card>
     </div>
   );

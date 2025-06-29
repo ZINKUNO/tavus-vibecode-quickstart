@@ -4,7 +4,7 @@ import { useAtom } from 'jotai';
 import { currentPageAtom } from '../store/navigation';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { Sparkles, Video, Calendar, MessageSquare, TrendingUp, Zap, Play } from 'lucide-react';
+import { Video, Calendar, MessageSquare, TrendingUp, Zap, Play } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
   const [, setCurrentPage] = useAtom(currentPageAtom);
@@ -49,7 +49,7 @@ export const HomePage: React.FC = () => {
             className="mb-8"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-glass backdrop-blur-md border border-white/20 text-sm text-white/80 mb-6">
-              <Sparkles className="w-4 h-4 text-neon-blue" />
+              <div className="w-2 h-2 bg-neon-blue rounded-full"></div>
               AI Assistant for Creators
             </div>
             
@@ -66,7 +66,7 @@ export const HomePage: React.FC = () => {
             <Button 
               size="lg" 
               className="text-lg px-12 py-6 h-auto animate-glow mr-4"
-              onClick={() => setCurrentPage('dashboard')}
+              onClick={() => setCurrentPage('content-creation')}
             >
               Try Free
             </Button>
@@ -164,39 +164,6 @@ export const HomePage: React.FC = () => {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Integrations Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl font-bold text-white mb-8 font-jakarta">
-              Powered by Industry Leaders
-            </h2>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {['Tavus', 'ElevenLabs', 'RevenueCat', 'Netlify'].map((integration, index) => (
-                <motion.div
-                  key={integration}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="p-6 bg-glass backdrop-blur-md border border-white/20 rounded-2xl"
-                >
-                  <div className="text-lg font-semibold text-white">
-                    {integration}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </section>
     </div>

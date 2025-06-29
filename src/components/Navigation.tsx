@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { currentPageAtom, type Page } from '../store/navigation';
-import { isAuthenticatedAtom, userAtom } from '../store/auth';
+import { isAuthenticatedAtom, userAtom, profileAtom } from '../store/auth';
 import { Button } from './ui/button';
 import { User, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -11,11 +11,13 @@ export const Navigation: React.FC = () => {
   const [currentPage, setCurrentPage] = useAtom(currentPageAtom);
   const [isAuthenticated] = useAtom(isAuthenticatedAtom);
   const [user] = useAtom(userAtom);
+  const [profile] = useAtom(profileAtom);
   const { signOut } = useAuth();
 
   const navItems: { label: string; page: Page }[] = [
     { label: 'Home', page: 'home' },
-    { label: 'Dashboard', page: 'dashboard' },
+    { label: 'Content Creation', page: 'content-creation' },
+    { label: 'Content Automation', page: 'content-automation' },
     { label: 'Pricing', page: 'pricing' },
   ];
 
@@ -58,10 +60,12 @@ export const Navigation: React.FC = () => {
           ))}
           
           <div className="flex items-center gap-3 relative">
-            {isAuthenticated && user && (
+            {isAuthenticated && (user || profile) && (
               <div className="flex items-center gap-2 text-white/70">
                 <User className="w-4 h-4" />
-                <span className="text-sm">{user.email}</span>
+                <span className="text-sm">
+                  {profile?.full_name || user?.email || 'User'}
+                </span>
               </div>
             )}
             <Button

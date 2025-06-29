@@ -7,7 +7,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { useAuth } from '../hooks/useAuth';
 import { currentPageAtom } from '../store/navigation';
-import { AlertCircle, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Mail, Lock, User, Wallet } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -17,7 +17,7 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, signUp, isLoading } = useAuth();
+  const { signIn, signUp, connectWeb3Wallet, isLoading } = useAuth();
   const [, setCurrentPage] = useAtom(currentPageAtom);
 
   const validateForm = () => {
@@ -65,7 +65,7 @@ export const LoginPage: React.FC = () => {
           if (rememberMe) {
             localStorage.setItem('rememberMe', 'true');
           }
-          setCurrentPage('dashboard');
+          setCurrentPage('content-creation');
         }
       } else {
         const { error } = await signUp(email, password, fullName);
@@ -90,6 +90,13 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err) {
       setError('An unexpected error occurred');
+    }
+  };
+
+  const handleWeb3Connect = async () => {
+    const result = await connectWeb3Wallet();
+    if (!result.success) {
+      setError(result.message);
     }
   };
 
@@ -221,6 +228,25 @@ export const LoginPage: React.FC = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/20" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-deep-blue px-2 text-white/60">Or</span>
+                  </div>
+                </div>
+
+                <Button 
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleWeb3Connect}
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Connect Web3 Wallet
                 </Button>
 
                 <div className="text-center">

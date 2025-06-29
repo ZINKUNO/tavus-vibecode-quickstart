@@ -5,7 +5,8 @@ import { SplashCursor } from './components/SplashCursor';
 import { Navigation } from './components/Navigation';
 import { FloatingAssistant } from './components/FloatingAssistant';
 import { HomePage } from './pages/HomePage';
-import { DashboardPage } from './pages/DashboardPage';
+import { ContentCreationPage } from './pages/ContentCreationPage';
+import { ContentAutomationPage } from './pages/ContentAutomationPage';
 import { PricingPage } from './pages/PricingPage';
 import { LoginPage } from './pages/LoginPage';
 import { useAuth } from './hooks/useAuth';
@@ -41,8 +42,10 @@ function App() {
     switch (currentPage) {
       case 'home':
         return <HomePage />;
-      case 'dashboard':
-        return <DashboardPage />;
+      case 'content-creation':
+        return <ContentCreationPage />;
+      case 'content-automation':
+        return <ContentAutomationPage />;
       case 'pricing':
         return <PricingPage />;
       case 'login':
