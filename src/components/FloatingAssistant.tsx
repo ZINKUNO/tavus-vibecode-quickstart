@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
-import { MessageCircle, X, Sparkles, Video } from 'lucide-react';
+import { MessageCircle, X, Sparkles, Video, Maximize2, Minimize2, Mic, Upload } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,9 +13,11 @@ const TAVUS_REPLICA_ID = 'r9fa0878977a';
 
 export const FloatingAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
-  const [inputText, setInputText] = useState('');
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
   const startTavusConversation = async () => {
     setIsCreating(true);
@@ -23,8 +25,8 @@ export const FloatingAssistant: React.FC = () => {
       const tavus = new TavusAPI(TAVUS_API_KEY);
       const newConversation = await tavus.createConversation({
         replica_id: TAVUS_REPLICA_ID,
-        custom_greeting: 'Hi! I\'m your AI creator assistant. How can I help you create amazing content today?',
-        conversational_context: 'You are an AI assistant specialized in helping content creators with video generation, social media strategy, and brand development.',
+        custom_greeting: 'Hi! I\'m your AI creator assistant. I can help you with post analysis through video conversation, writing scripts for your niche, and sharing the latest trends in your field.',
+        conversational_context: 'You are an AI assistant specialized in helping content creators with post analysis, script writing for their specific niche, and providing trending insights in their field.',
       });
       
       setConversation(newConversation);
@@ -44,6 +46,46 @@ export const FloatingAssistant: React.FC = () => {
       } catch (error) {
         console.error('Failed to end Tavus conversation:', error);
       }
+    }
+  };
+
+  const generateVideoFromAudio = async () => {
+    if (!audioFile) return;
+
+    setIsGeneratingVideo(true);
+    try {
+      // First, upload the audio file (you'd need to implement file upload)
+      const formData = new FormData();
+      formData.append('audio', audioFile);
+      
+      // This is a placeholder - you'd need to implement audio upload to get a URL
+      const audioUrl = 'https://example.com/audio.mp3'; // Replace with actual upload logic
+
+      const response = await fetch('https://tavusapi.com/v2/videos', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": TAVUS_API_KEY
+        },
+        body: JSON.stringify({
+          "replica_id": "rb17cf590e15",
+          "audio_url": audioUrl
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Video generation started:', data);
+    } catch (error) {
+      console.error('Failed to generate video from audio:', error);
+    } finally {
+      setIsGeneratingVideo(false);
+    }
+  };
+
+  const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('audio/')) {
+      setAudioFile(file);
     }
   };
 
@@ -97,7 +139,9 @@ export const FloatingAssistant: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed bottom-24 right-6 z-40 w-96 h-[500px]"
+            className={`fixed bottom-24 right-6 z-40 ${
+              isExpanded ? 'w-[800px] h-[600px]' : 'w-96 h-[500px]'
+            } transition-all duration-300`}
           >
             <Card className="h-full flex flex-col">
               <div className="p-4 border-b border-white/10">
@@ -111,16 +155,26 @@ export const FloatingAssistant: React.FC = () => {
                       <p className="text-xs text-white/60">Powered by Tavus</p>
                     </div>
                   </div>
-                  {conversation && (
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={endTavusConversation}
-                      className="text-red-400 hover:text-red-300"
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="text-white/60 hover:text-white"
                     >
-                      End Call
+                      {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                     </Button>
-                  )}
+                    {conversation && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={endTavusConversation}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        End Call
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -134,16 +188,35 @@ export const FloatingAssistant: React.FC = () => {
                     />
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="bg-white/10 p-3 rounded-xl border border-white/20">
-                      <p className="text-sm text-white">
-                        👋 Hi! I'm your AI assistant. I can help you:
+                  <div className="space-y-4">
+                    <div className="bg-white/10 p-4 rounded-xl border border-white/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <img 
+                          src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=400" 
+                          alt="AI Assistant" 
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div>
+                          <h4 className="font-semibold text-white">Your AI Creator Assistant</h4>
+                          <p className="text-xs text-white/60">Ready to help you succeed</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-white mb-3">
+                        👋 Hi! I can help you with:
                       </p>
-                      <ul className="text-xs text-white/80 mt-2 space-y-1">
-                        <li>• Create personalized videos</li>
-                        <li>• Generate brand content</li>
-                        <li>• Schedule social posts</li>
-                        <li>• Write marketing copy</li>
+                      <ul className="text-xs text-white/80 space-y-2">
+                        <li className="flex items-center gap-2">
+                          <Video className="w-4 h-4 text-neon-blue" />
+                          Post analysis through video conversation
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <MessageCircle className="w-4 h-4 text-neon-purple" />
+                          Writing scripts according to your niche
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-neon-pink" />
+                          Latest trends in your field
+                        </li>
                       </ul>
                     </div>
                     
@@ -155,25 +228,43 @@ export const FloatingAssistant: React.FC = () => {
                       <Video className="w-4 h-4 mr-2" />
                       {isCreating ? 'Starting...' : 'Start Video Chat'}
                     </Button>
+
+                    {/* Audio Video Generation */}
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                      <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                        <Mic className="w-4 h-4" />
+                        Generate Video from Audio
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            onChange={handleAudioUpload}
+                            className="hidden"
+                            id="audio-upload"
+                          />
+                          <label
+                            htmlFor="audio-upload"
+                            className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm cursor-pointer hover:bg-white/20 transition-colors flex items-center gap-2"
+                          >
+                            <Upload className="w-4 h-4" />
+                            {audioFile ? audioFile.name : 'Choose audio file'}
+                          </label>
+                        </div>
+                        <Button
+                          onClick={generateVideoFromAudio}
+                          disabled={!audioFile || isGeneratingVideo}
+                          variant="secondary"
+                          className="w-full"
+                        >
+                          {isGeneratingVideo ? 'Generating...' : 'Generate Video'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-
-              {!conversation && (
-                <div className="p-4 border-t border-white/10">
-                  <div className="flex gap-2">
-                    <Input
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      placeholder="Ask me anything..."
-                      className="flex-1 bg-white/10 border-white/20 text-white text-sm placeholder-white/50"
-                    />
-                    <Button size="sm" className="px-3">
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
             </Card>
           </motion.div>
         )}
