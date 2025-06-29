@@ -18,8 +18,10 @@ import {
 } from 'lucide-react';
 import { usePicaIntegration } from '../../hooks/usePicaIntegration';
 import { PicaAPI } from '../../lib/pica';
+import { useAuth } from '../../hooks/useAuth';
 
 export const PicaSocialConnector: React.FC = () => {
+  const { user } = useAuth();
   const {
     connectedAccounts,
     isLoading,
@@ -41,6 +43,11 @@ export const PicaSocialConnector: React.FC = () => {
 
   const supportedPlatforms = PicaAPI.getSupportedPlatforms();
 
+  // Check if Pica is properly configured
+  const isPicaConfigured = !!import.meta.env.VITE_PICA_SECRET_KEY;
+  const isUserAuthenticated = !!user;
+  const canUseAgent = isUserAuthenticated && isPicaConfigured;
+
   const handleConnectPlatform = async (platformId: string) => {
     try {
       await connectAccount(platformId);
@@ -58,7 +65,7 @@ export const PicaSocialConnector: React.FC = () => {
   };
 
   const handleAgentPost = async () => {
-    if (!agentPrompt.trim()) return;
+    if (!agentPrompt.trim() || !canUseAgent) return;
 
     try {
       setIsPosting(true);
@@ -126,6 +133,24 @@ export const PicaSocialConnector: React.FC = () => {
             </div>
           )}
 
+          {!isPicaConfigured && (
+            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-400" />
+              <span className="text-yellow-400 text-sm">
+                Pica AI is not configured. Please add your VITE_PICA_SECRET_KEY to the environment variables.
+              </span>
+            </div>
+          )}
+
+          {!isUserAuthenticated && (
+            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-400 text-sm">
+                Please log in to use social media features.
+              </span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {supportedPlatforms.map((platform) => {
               const account = getAccount(platform.id);
@@ -175,6 +200,7 @@ export const PicaSocialConnector: React.FC = () => {
                           size="sm"
                           onClick={() => account && handleDisconnectPlatform(account.id)}
                           className="flex-1 text-xs"
+                          disabled={!canUseAgent}
                         >
                           <Unlink className="w-3 h-3 mr-1" />
                           Disconnect
@@ -183,7 +209,7 @@ export const PicaSocialConnector: React.FC = () => {
                     ) : (
                       <Button
                         onClick={() => handleConnectPlatform(platform.id)}
-                        disabled={isLoading}
+                        disabled={isLoading || !canUseAgent}
                         className="w-full text-xs"
                         size="sm"
                       >
@@ -222,11 +248,12 @@ export const PicaSocialConnector: React.FC = () => {
               onChange={(e) => setAgentPrompt(e.target.value)}
               placeholder="e.g., 'Post this video to Instagram Reels at 5 PM' or 'Share on LinkedIn and Twitter now'"
               className="bg-white/10 border-white/20 text-white"
+              disabled={!canUseAgent}
             />
             <div className="flex gap-2">
               <Button
                 onClick={handleAgentPost}
-                disabled={!agentPrompt.trim() || isPosting}
+                disabled={!agentPrompt.trim() || isPosting || !canUseAgent}
                 className="flex-1"
               >
                 {isPosting ? (
@@ -267,6 +294,7 @@ export const PicaSocialConnector: React.FC = () => {
               onChange={(e) => setPostContent(e.target.value)}
               placeholder="Write your post content..."
               className="w-full h-24 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 resize-none focus:outline-none focus:ring-2 focus:ring-neon-blue"
+              disabled={!canUseAgent}
             />
           </div>
 
@@ -282,6 +310,7 @@ export const PicaSocialConnector: React.FC = () => {
                     size="sm"
                     onClick={() => togglePlatformSelection(platform.id)}
                     className="text-xs"
+                    disabled={!canUseAgent}
                   >
                     <span className="mr-1">{platform.icon}</span>
                     {platform.name}
@@ -297,12 +326,13 @@ export const PicaSocialConnector: React.FC = () => {
               value={scheduleTime}
               onChange={(e) => setScheduleTime(e.target.value)}
               className="bg-white/10 border-white/20 text-white"
+              disabled={!canUseAgent}
             />
           </div>
 
           <Button
             onClick={handleDirectPost}
-            disabled={!postContent.trim() || selectedPlatforms.length === 0 || isPosting}
+            disabled={!postContent.trim() || selectedPlatforms.length === 0 || isPosting || !canUseAgent}
             className="w-full"
           >
             {isPosting ? (
