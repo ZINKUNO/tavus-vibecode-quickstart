@@ -4,7 +4,7 @@ import { useAtom } from 'jotai';
 import { currentPageAtom } from '../store/navigation';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { Sparkles, Video, Calendar, MessageSquare, TrendingUp, Zap } from 'lucide-react';
+import { Sparkles, Video, Calendar, MessageSquare, TrendingUp, Zap, Play } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
   const [, setCurrentPage] = useAtom(currentPageAtom);
@@ -98,13 +98,27 @@ export const HomePage: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
           >
-            <Card className="aspect-video bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 border border-white/20 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-neon-gradient rounded-full mx-auto mb-6 flex items-center justify-center animate-pulse">
-                  <Video className="w-10 h-10 text-white" />
+            <Card className="relative aspect-video bg-black border border-white/20 overflow-hidden rounded-2xl">
+              <iframe
+                src="https://tavus.video/8f3ab19532"
+                className="w-full h-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                title="AI Avatar Demo"
+              />
+              
+              {/* Overlay with title and branding */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-1">AI Avatar Demo</h3>
+                    <p className="text-white/70 text-sm">Powered by Tavus Technology</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Play className="w-5 h-5 text-neon-blue" />
+                    <span className="text-neon-blue text-sm font-medium">Watch Demo</span>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-semibold text-white mb-2">AI Avatar Demo</h3>
-                <p className="text-white/60">Powered by Tavus Technology</p>
               </div>
             </Card>
           </motion.div>
