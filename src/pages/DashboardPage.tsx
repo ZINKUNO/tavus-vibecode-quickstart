@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { ContentCalendar } from '../components/dashboard/ContentCalendar';
 import { AnalyticsDashboard } from '../components/dashboard/AnalyticsDashboard';
-import { VideoGenerator } from '../components/dashboard/VideoGenerator';
+import { EnhancedVideoGenerator } from '../components/dashboard/EnhancedVideoGenerator';
 import { AudioVideoGenerator } from '../components/dashboard/AudioVideoGenerator';
 import { SocialMediaConnector } from '../components/dashboard/SocialMediaConnector';
+import { ReplicaPersonaManager } from '../components/dashboard/ReplicaPersonaManager';
 import { userAtom, profileAtom } from '../store/auth';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
@@ -69,15 +70,26 @@ export const DashboardPage: React.FC = () => {
 
         {isAuthenticated ? (
           <>
+            {/* AI Assets Management */}
+            <div className="mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <ReplicaPersonaManager />
+              </motion.div>
+            </div>
+
             <div className="grid lg:grid-cols-2 gap-8 mb-8">
-              {/* Left Panel - Video Generator */}
+              {/* Left Panel - Enhanced Video Generator */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
                 className="space-y-6"
               >
-                <VideoGenerator />
+                <EnhancedVideoGenerator />
               </motion.div>
 
               {/* Right Panel - Audio Video Generator */}
