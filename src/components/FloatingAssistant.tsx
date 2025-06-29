@@ -6,6 +6,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
+import { WhisperTranscriptionPanel } from './WhisperTranscriptionPanel';
 
 const TAVUS_API_KEY = '2f263fcb5fa44c7ca8ed76d789cdb756';
 const TAVUS_REPLICA_ID = 'r9fa0878977a';
@@ -15,6 +16,7 @@ export const FloatingAssistant: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
+  const [showTranscription, setShowTranscription] = useState(false);
 
   const startTavusConversation = async () => {
     setIsCreating(true);
@@ -27,6 +29,7 @@ export const FloatingAssistant: React.FC = () => {
       });
       
       setConversation(newConversation);
+      setShowTranscription(true); // Show transcription panel when conversation starts
     } catch (error) {
       console.error('Failed to create Tavus conversation:', error);
     } finally {
@@ -40,6 +43,7 @@ export const FloatingAssistant: React.FC = () => {
         const tavus = new TavusAPI(TAVUS_API_KEY);
         await tavus.endConversation(conversation.conversation_id);
         setConversation(null);
+        setShowTranscription(false);
       } catch (error) {
         console.error('Failed to end Tavus conversation:', error);
       }
@@ -97,7 +101,7 @@ export const FloatingAssistant: React.FC = () => {
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className={`fixed bottom-24 right-6 z-40 ${
-              isExpanded ? 'w-[800px] h-[600px]' : 'w-96 h-[500px]'
+              isExpanded ? 'w-[1200px] h-[700px]' : 'w-96 h-[500px]'
             } transition-all duration-300`}
           >
             <Card className="h-full flex flex-col">
@@ -109,7 +113,7 @@ export const FloatingAssistant: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white text-sm">AI Assistant</h3>
-                      <p className="text-xs text-white/60">Powered by Tavus</p>
+                      <p className="text-xs text-white/60">Powered by Tavus & Whisper</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -135,17 +139,29 @@ export const FloatingAssistant: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
                 {conversation ? (
-                  <div className="h-full">
-                    <iframe
-                      src={conversation.conversation_url}
-                      allow="camera; microphone; fullscreen; display-capture"
-                      className="w-full h-full rounded-lg border-0"
-                    />
+                  <div className={`h-full ${isExpanded ? 'flex gap-4 p-4' : ''}`}>
+                    <div className={`${isExpanded ? 'flex-1' : 'h-full'}`}>
+                      <iframe
+                        src={conversation.conversation_url}
+                        allow="camera; microphone; fullscreen; display-capture"
+                        className="w-full h-full rounded-lg border-0"
+                      />
+                    </div>
+                    
+                    {/* Whisper Transcription Panel - Only show when expanded and conversation is active */}
+                    {isExpanded && showTranscription && (
+                      <div className="w-96 h-full">
+                        <WhisperTranscriptionPanel 
+                          autoStart={true}
+                          showSettings={true}
+                        />
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="p-4 space-y-4">
                     <div className="bg-white/10 p-4 rounded-xl border border-white/20">
                       <div className="flex items-center gap-3 mb-3">
                         <img 
@@ -183,8 +199,13 @@ export const FloatingAssistant: React.FC = () => {
                       className="w-full"
                     >
                       <Video className="w-4 h-4 mr-2" />
-                      {isCreating ? 'Starting...' : 'Start Video Chat'}
+                      {isCreating ? 'Starting...' : 'Start Video Chat with Transcription'}
                     </Button>
+
+                    <div className="text-center text-xs text-white/60 space-y-1">
+                      <p>💡 Tip: Expand the chat window to see live Whisper transcription</p>
+                      <p>🎤 Real-time speech-to-text powered by OpenAI Whisper</p>
+                    </div>
                   </div>
                 )}
               </div>
