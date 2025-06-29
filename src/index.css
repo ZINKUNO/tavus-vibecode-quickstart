@@ -1,79 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 0 0% 0%;
-    --foreground: 240 10% 4%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
-
-    --primary: 190 100% 50%;
-    --primary-foreground: 190 100% 95%;
-
-    --secondary: 0 0% 100%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 190 100% 50%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 127 41% 49%;
-
-    --progress: 213 86% 60%;
-
-    --border: 190 100% 50%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 190 100% 50%;
-
-    --radius: 0.5rem;
-  }
-}
 
 @layer base {
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-secondary;
-    @apply font-inter;
+    @apply bg-deep-blue text-white font-inter;
+    overflow-x: hidden;
+  }
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-@font-face {
-  font-family: "Christmas and Santona";
-  src: url("/src/fonts/Christmas and Santona.ttf") format("truetype");
-  font-display: swap;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
-main {
-  height: 100svh;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.text-shadow {
-  text-shadow:
-    -1px -1px 0 white,
-    1px -1px 0 white,
-    -1px 1px 0 white,
-    1px 1px 0 white;
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
 
-.grecaptcha-badge {
-  width: 0 !important;
-  height: 0 !important;
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.5);
+  border-radius: 3px;
 }
 
-input::placeholder {
-  color: rgb(187, 187, 187) !important;
-  font-family: 'Source Code Pro', monospace;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.7);
+}
+
+/* Selection styles */
+::selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: white;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid #00D4FF;
+  outline-offset: 2px;
 }
