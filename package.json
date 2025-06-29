@@ -13,6 +13,7 @@
     "@daily-co/daily-js": "^0.73.0",
     "@daily-co/daily-react": "^0.22.0",
     "@picahq/ai": "^1.0.0",
+    "@picahq/authkit": "^1.0.1",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.1.0",

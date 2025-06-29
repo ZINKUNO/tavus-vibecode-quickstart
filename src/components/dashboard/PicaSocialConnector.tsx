@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
+import { AuthKitButton } from '../AuthKitButton';
+import { AuthKitSocialConnector } from './AuthKitSocialConnector';
 import { 
   Plus,
   CheckCircle,
@@ -14,14 +16,14 @@ import {
   Loader2,
   MessageSquare,
   Unlink,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 import { usePicaIntegration } from '../../hooks/usePicaIntegration';
 import { PicaAPI } from '../../lib/pica';
-import { useAuth } from '../../hooks/useAuth';
 
 export const PicaSocialConnector: React.FC = () => {
-  const { user } = useAuth();
+  const [showAuthKit, setShowAuthKit] = useState(false);
   const {
     connectedAccounts,
     isLoading,
@@ -43,11 +45,6 @@ export const PicaSocialConnector: React.FC = () => {
 
   const supportedPlatforms = PicaAPI.getSupportedPlatforms();
 
-  // Check if Pica is properly configured
-  const isPicaConfigured = !!import.meta.env.VITE_PICA_SECRET_KEY;
-  const isUserAuthenticated = !!user;
-  const canUseAgent = isUserAuthenticated && isPicaConfigured;
-
   const handleConnectPlatform = async (platformId: string) => {
     try {
       await connectAccount(platformId);
@@ -65,7 +62,7 @@ export const PicaSocialConnector: React.FC = () => {
   };
 
   const handleAgentPost = async () => {
-    if (!agentPrompt.trim() || !canUseAgent) return;
+    if (!agentPrompt.trim()) return;
 
     try {
       setIsPosting(true);
@@ -111,8 +108,54 @@ export const PicaSocialConnector: React.FC = () => {
     );
   };
 
+  if (showAuthKit) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">AuthKit Integration</h2>
+            <p className="text-white/60">Secure social media connections with enterprise-grade security</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowAuthKit(false)}
+          >
+            Back to Pica AI
+          </Button>
+        </div>
+        <AuthKitSocialConnector />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* AuthKit Upgrade Banner */}
+      <Card className="border-green-500/30 bg-gradient-to-r from-green-500/10 to-blue-500/10">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">Upgrade to AuthKit</h3>
+                <p className="text-sm text-white/70">
+                  Enterprise-grade security with OAuth 2.0 and encrypted token storage
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowAuthKit(true)}
+              className="bg-gradient-to-r from-green-500 to-blue-500"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Try AuthKit
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Connected Accounts Overview */}
       <Card>
         <CardHeader>
@@ -130,24 +173,6 @@ export const PicaSocialConnector: React.FC = () => {
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-red-400" />
               <span className="text-red-400 text-sm">{error}</span>
-            </div>
-          )}
-
-          {!isPicaConfigured && (
-            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-400" />
-              <span className="text-yellow-400 text-sm">
-                Pica AI is not configured. Please add your VITE_PICA_SECRET_KEY to the environment variables.
-              </span>
-            </div>
-          )}
-
-          {!isUserAuthenticated && (
-            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-400 text-sm">
-                Please log in to use social media features.
-              </span>
             </div>
           )}
 
@@ -200,7 +225,6 @@ export const PicaSocialConnector: React.FC = () => {
                           size="sm"
                           onClick={() => account && handleDisconnectPlatform(account.id)}
                           className="flex-1 text-xs"
-                          disabled={!canUseAgent}
                         >
                           <Unlink className="w-3 h-3 mr-1" />
                           Disconnect
@@ -209,7 +233,7 @@ export const PicaSocialConnector: React.FC = () => {
                     ) : (
                       <Button
                         onClick={() => handleConnectPlatform(platform.id)}
-                        disabled={isLoading || !canUseAgent}
+                        disabled={isLoading}
                         className="w-full text-xs"
                         size="sm"
                       >
@@ -225,6 +249,38 @@ export const PicaSocialConnector: React.FC = () => {
                 </motion.div>
               );
             })}
+          </div>
+
+          {/* AuthKit CTA */}
+          <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-xl border border-green-500/20">
+            <div className="flex items-center gap-3 mb-2">
+              <Shield className="w-5 h-5 text-green-400" />
+              <h4 className="font-semibold text-white">Enterprise Security Available</h4>
+            </div>
+            <p className="text-sm text-white/70 mb-3">
+              Upgrade to AuthKit for OAuth 2.0 compliance, encrypted token storage, and enterprise-grade security features.
+            </p>
+            <div className="flex gap-3">
+              <AuthKitButton
+                className="bg-gradient-to-r from-green-500 to-blue-500"
+                onSuccess={(connection) => {
+                  console.log('AuthKit connection successful:', connection);
+                }}
+                onError={(error) => {
+                  console.error('AuthKit connection failed:', error);
+                }}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Connect with AuthKit
+              </AuthKitButton>
+              <Button
+                variant="outline"
+                onClick={() => setShowAuthKit(true)}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Learn More
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -248,12 +304,11 @@ export const PicaSocialConnector: React.FC = () => {
               onChange={(e) => setAgentPrompt(e.target.value)}
               placeholder="e.g., 'Post this video to Instagram Reels at 5 PM' or 'Share on LinkedIn and Twitter now'"
               className="bg-white/10 border-white/20 text-white"
-              disabled={!canUseAgent}
             />
             <div className="flex gap-2">
               <Button
                 onClick={handleAgentPost}
-                disabled={!agentPrompt.trim() || isPosting || !canUseAgent}
+                disabled={!agentPrompt.trim() || isPosting}
                 className="flex-1"
               >
                 {isPosting ? (
@@ -294,7 +349,6 @@ export const PicaSocialConnector: React.FC = () => {
               onChange={(e) => setPostContent(e.target.value)}
               placeholder="Write your post content..."
               className="w-full h-24 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 resize-none focus:outline-none focus:ring-2 focus:ring-neon-blue"
-              disabled={!canUseAgent}
             />
           </div>
 
@@ -310,7 +364,6 @@ export const PicaSocialConnector: React.FC = () => {
                     size="sm"
                     onClick={() => togglePlatformSelection(platform.id)}
                     className="text-xs"
-                    disabled={!canUseAgent}
                   >
                     <span className="mr-1">{platform.icon}</span>
                     {platform.name}
@@ -326,13 +379,12 @@ export const PicaSocialConnector: React.FC = () => {
               value={scheduleTime}
               onChange={(e) => setScheduleTime(e.target.value)}
               className="bg-white/10 border-white/20 text-white"
-              disabled={!canUseAgent}
             />
           </div>
 
           <Button
             onClick={handleDirectPost}
-            disabled={!postContent.trim() || selectedPlatforms.length === 0 || isPosting || !canUseAgent}
+            disabled={!postContent.trim() || selectedPlatforms.length === 0 || isPosting}
             className="w-full"
           >
             {isPosting ? (
