@@ -132,8 +132,41 @@ export class ElevenLabsTranscriber {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`ElevenLabs API error (${response.status}): ${errorData.detail || response.statusText}`);
+        let errorMessage = `ElevenLabs API error (${response.status}): ${response.statusText}`;
+        
+        try {
+          const errorData = await response.json();
+          
+          // Extract detailed error message from various possible fields
+          if (errorData.detail) {
+            if (typeof errorData.detail === 'string') {
+              errorMessage = `ElevenLabs API error (${response.status}): ${errorData.detail}`;
+            } else if (Array.isArray(errorData.detail)) {
+              // Handle validation errors that come as arrays
+              const details = errorData.detail.map((err: any) => {
+                if (typeof err === 'string') return err;
+                if (err.msg) return err.msg;
+                if (err.message) return err.message;
+                return JSON.stringify(err);
+              }).join(', ');
+              errorMessage = `ElevenLabs API error (${response.status}): ${details}`;
+            } else {
+              errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData.detail)}`;
+            }
+          } else if (errorData.message) {
+            errorMessage = `ElevenLabs API error (${response.status}): ${errorData.message}`;
+          } else if (errorData.error) {
+            errorMessage = `ElevenLabs API error (${response.status}): ${errorData.error}`;
+          } else {
+            // Fallback to full error object
+            errorMessage = `ElevenLabs API error (${response.status}): ${JSON.stringify(errorData)}`;
+          }
+        } catch (parseError) {
+          // If we can't parse the error response, use the original message
+          console.warn('Failed to parse error response:', parseError);
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
@@ -284,18 +317,33 @@ export class ElevenLabsTranscriber {
    * Private method to handle transcription errors
    */
   private handleTranscriptionError(error: any) {
-    if (error.message?.includes('429')) {
+    const errorMessage = error.message || error.toString();
+    
+    if (errorMessage.includes('422')) {
+      // Extract the detailed error message for 422 errors
+      const match = errorMessage.match(/ElevenLabs API error \(422\): (.+)/);
+      if (match && match[1]) {
+        this.onError(`ElevenLabs API validation error: ${match[1]}`);
+      } else {
+        this.onError('ElevenLabs API validation error. Please check your audio format and parameters.');
+      }
+    } else if (errorMessage.includes('429')) {
       this.onError('ElevenLabs API rate limit exceeded. Please wait a moment and try again.');
-    } else if (error.message?.includes('401') || error.message?.includes('403')) {
+    } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
       this.onError('ElevenLabs API authentication failed. Please check your API key configuration.');
-    } else if (error.message?.includes('400')) {
+    } else if (errorMessage.includes('400')) {
       this.onError('Invalid audio format or request. Please try a different audio file.');
-    } else if (error.message?.includes('413')) {
+    } else if (errorMessage.includes('413')) {
       this.onError(`Audio file too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
-    } else if (error.message?.includes('not configured')) {
+    } else if (errorMessage.includes('not configured')) {
       this.onError('ElevenLabs API key not configured. Please add VITE_ELEVENLABS_API_KEY to your .env file.');
     } else {
-      this.onError('Failed to transcribe audio with ElevenLabs. Please try again.');
+      // For any other errors, try to extract meaningful information
+      if (errorMessage.includes('ElevenLabs API error')) {
+        this.onError(errorMessage);
+      } else {
+        this.onError('Failed to transcribe audio with ElevenLabs. Please try again.');
+      }
     }
   }
 }
