@@ -15,8 +15,11 @@ import {
   AlertCircle,
   TrendingUp,
   Users,
-  Heart
+  Heart,
+  Zap,
+  ExternalLink
 } from 'lucide-react';
+import { PicaSocialConnector } from './PicaSocialConnector';
 
 interface SocialAccount {
   platform: string;
@@ -74,7 +77,8 @@ const platforms: Record<string, PlatformConfig> = {
 };
 
 export const SocialMediaConnector: React.FC = () => {
-  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([
+  const [showPicaIntegration, setShowPicaIntegration] = useState(false);
+  const [connectedAccounts] = useState<SocialAccount[]>([
     {
       platform: 'instagram',
       username: '@creator_pilot',
@@ -93,19 +97,13 @@ export const SocialMediaConnector: React.FC = () => {
     },
   ]);
 
-  const [insights, setInsights] = useState({
+  const [insights] = useState({
     totalReach: 156000,
     avgEngagement: 5.5,
     topPerformingPlatform: 'youtube',
     suggestedPostTime: '6:00 PM',
     trendingHashtags: ['#AI', '#ContentCreator', '#VideoMarketing'],
   });
-
-  const connectAccount = (platform: string) => {
-    // Simulate OAuth connection flow
-    console.log(`Connecting to ${platform}...`);
-    // In a real app, this would redirect to OAuth flow
-  };
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
@@ -117,8 +115,54 @@ export const SocialMediaConnector: React.FC = () => {
     platform => !connectedAccounts.some(account => account.platform === platform)
   );
 
+  if (showPicaIntegration) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Pica AI Integration</h2>
+            <p className="text-white/60">Advanced social media automation with AI</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowPicaIntegration(false)}
+          >
+            Back to Overview
+          </Button>
+        </div>
+        <PicaSocialConnector />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Header with Pica Integration CTA */}
+      <Card className="border-neon-purple/30 bg-gradient-to-r from-neon-purple/10 to-neon-blue/10">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-neon-gradient flex items-center justify-center">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">Upgrade to Pica AI</h3>
+                <p className="text-sm text-white/70">
+                  Automate posting with natural language commands
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowPicaIntegration(true)}
+              className="bg-neon-gradient"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Try Pica AI
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Connected Accounts */}
       <Card>
         <CardHeader>
@@ -261,7 +305,6 @@ export const SocialMediaConnector: React.FC = () => {
                   <Button
                     key={platformKey}
                     variant="outline"
-                    onClick={() => connectAccount(platformKey)}
                     className="h-auto p-4 flex flex-col items-center gap-3 hover:bg-white/10"
                   >
                     <div className={`w-12 h-12 rounded-xl ${platform.bgColor} flex items-center justify-center`}>
@@ -271,6 +314,24 @@ export const SocialMediaConnector: React.FC = () => {
                   </Button>
                 );
               })}
+            </div>
+            
+            <div className="mt-6 p-4 bg-neon-blue/10 rounded-xl border border-neon-blue/20">
+              <div className="flex items-center gap-3 mb-2">
+                <Zap className="w-5 h-5 text-neon-blue" />
+                <h4 className="font-semibold text-white">Upgrade to Pica AI</h4>
+              </div>
+              <p className="text-sm text-white/70 mb-3">
+                Connect unlimited accounts and automate posting with natural language commands like "Post this to Instagram and LinkedIn at 5 PM"
+              </p>
+              <Button
+                onClick={() => setShowPicaIntegration(true)}
+                size="sm"
+                className="bg-neon-gradient"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Try Pica Integration
+              </Button>
             </div>
           </CardContent>
         </Card>

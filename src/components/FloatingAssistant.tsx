@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAtom } from 'jotai';
-import { MessageCircle, X, Sparkles, Video, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Sparkles, Video, Maximize2, Minimize2, Zap } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { TavusAPI } from '../lib/tavus';
 import { tavusConversationAtom, isCreatingConversationAtom } from '../store/tavus';
 import { ElevenLabsTranscriptionPanel } from './ElevenLabsTranscriptionPanel';
+import { PicaAssistantChat } from './assistant/PicaAssistantChat';
 
 const TAVUS_API_KEY = '2f263fcb5fa44c7ca8ed76d789cdb756';
 const TAVUS_REPLICA_ID = 'r9fa0878977a';
@@ -14,6 +15,7 @@ const TAVUS_REPLICA_ID = 'r9fa0878977a';
 export const FloatingAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<'tavus' | 'pica'>('pica');
   const [conversation, setConversation] = useAtom(tavusConversationAtom);
   const [isCreating, setIsCreating] = useAtom(isCreatingConversationAtom);
   const [showTranscription, setShowTranscription] = useState(false);
@@ -29,7 +31,8 @@ export const FloatingAssistant: React.FC = () => {
       });
       
       setConversation(newConversation);
-      setShowTranscription(true); // Show transcription panel when conversation starts
+      setShowTranscription(true);
+      setActiveTab('tavus');
     } catch (error) {
       console.error('Failed to create Tavus conversation:', error);
     } finally {
@@ -44,6 +47,7 @@ export const FloatingAssistant: React.FC = () => {
         await tavus.endConversation(conversation.conversation_id);
         setConversation(null);
         setShowTranscription(false);
+        setActiveTab('pica');
       } catch (error) {
         console.error('Failed to end Tavus conversation:', error);
       }
@@ -113,7 +117,7 @@ export const FloatingAssistant: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white text-sm">AI Assistant</h3>
-                      <p className="text-xs text-white/60">Powered by Tavus & ElevenLabs</p>
+                      <p className="text-xs text-white/60">Tavus & Pica AI Powered</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -137,10 +141,34 @@ export const FloatingAssistant: React.FC = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Tab Navigation */}
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    variant={activeTab === 'pica' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab('pica')}
+                    className="text-xs"
+                  >
+                    <Zap className="w-3 h-3 mr-1" />
+                    Pica AI
+                  </Button>
+                  <Button
+                    variant={activeTab === 'tavus' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setActiveTab('tavus')}
+                    className="text-xs"
+                  >
+                    <Video className="w-3 h-3 mr-1" />
+                    Tavus Video
+                  </Button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-hidden">
-                {conversation ? (
+                {activeTab === 'pica' ? (
+                  <PicaAssistantChat />
+                ) : conversation ? (
                   <div className={`h-full ${isExpanded ? 'flex gap-4 p-4' : ''}`}>
                     <div className={`${isExpanded ? 'flex-1' : 'h-full'}`}>
                       <iframe
@@ -170,12 +198,12 @@ export const FloatingAssistant: React.FC = () => {
                           className="w-12 h-12 rounded-full object-cover"
                         />
                         <div>
-                          <h4 className="font-semibold text-white">Your AI Creator Assistant</h4>
-                          <p className="text-xs text-white/60">Ready to help you succeed</p>
+                          <h4 className="font-semibold text-white">Video AI Assistant</h4>
+                          <p className="text-xs text-white/60">Powered by Tavus</p>
                         </div>
                       </div>
                       <p className="text-sm text-white mb-3">
-                        👋 Hi! I can help you with:
+                        👋 Start a video conversation for:
                       </p>
                       <ul className="text-xs text-white/80 space-y-2">
                         <li className="flex items-center gap-2">
@@ -199,11 +227,11 @@ export const FloatingAssistant: React.FC = () => {
                       className="w-full"
                     >
                       <Video className="w-4 h-4 mr-2" />
-                      {isCreating ? 'Starting...' : 'Start Video Chat with ElevenLabs Transcription'}
+                      {isCreating ? 'Starting...' : 'Start Video Chat'}
                     </Button>
 
                     <div className="text-center text-xs text-white/60 space-y-1">
-                      <p>💡 Tip: Expand the chat window to see live ElevenLabs transcription</p>
+                      <p>💡 Tip: Expand the chat window to see live transcription</p>
                       <p>🎤 Real-time speech-to-text powered by ElevenLabs AI</p>
                     </div>
                   </div>
